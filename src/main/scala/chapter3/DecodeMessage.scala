@@ -1,6 +1,36 @@
 package decode
 
-class Decoder() {
+case class Decoder(i: String) {
+
+  def size(): Int = {
+    val a = i split ""
+    a.length match {
+      case 0 => 0
+      case 1 => decode(a)
+      case _ =>
+        val v = (a sliding 2).foldLeft(0){ (acc, x) => acc + decode(x)}
+        if(i.length % 2 > 0) {
+          decode(List(a.last)) + v
+        } else {
+          v
+        }
+    }
+  } 
+
+  def decode(x: Seq[String]): Int = x.size match {
+    case 1 =>
+      if(Decoder.m.contains(x.head)) {
+        1
+      } else {
+        0
+      }
+    case _ =>
+      List(Decoder.m.get(x.head), Decoder.m.get(x.mkString)).flatten.size
+  }
+  
+}
+
+object Decoder {
 
   val m = Map(
     "1" -> "a",
@@ -30,30 +60,5 @@ class Decoder() {
     "25" -> "y",
     "26" -> "z"
   )
-
-  def size(i: List[String]): Int = i.length match {
-    case 0 => 0
-    case 1 => decode(i)
-    case _ =>
-      val v = (i sliding 2).foldLeft(0){ (acc, x) => acc + decode(x)}
-      if(i.length % 2 > 0) {
-        decode(List(i.last)) + v
-      } else {
-        v
-      }
-      
-  }
-
-  def decode(x: List[String]): Int = x.size match {
-    case 1 =>
-      if(m.contains(x.head)) {
-        1
-      } else {
-        0
-      }
-    case _ =>
-      List(m.get(x.head), m.get(x.mkString)).flatten.size
-  }
   
 }
-
