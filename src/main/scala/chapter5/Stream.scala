@@ -38,7 +38,7 @@ trait Stream[+A] {
 
   def headOption: Option[A] = foldRight(None: Option[A])((h, _) => Some(h))
 
-//  def map[B](f: A => B): Stream[B] = foldRight(empty[B]((a, b) => cons(f(a), b)))
+  def map[B](f: A => B): Stream[B] = foldRight(empty[B])((a, b) => cons(f(a), b))
 
   def filter(f: A => Boolean): Stream[A] =
     foldRight(Stream.empty[A])((h, t) => if (f(h)) Stream.cons(h, t) else t)
