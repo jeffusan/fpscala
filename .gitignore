@@ -3,3 +3,4 @@ project/
 project/target/
 .ensime_cache/
 .ensime
+.idea/

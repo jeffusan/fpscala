@@ -1,6 +1,5 @@
 package chapter5
 
-import scala.annotation.tailrec
 
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -41,53 +40,43 @@ trait Stream[+A] {
 
   def headOption: Option[A] = foldRight(None: Option[A])((h, _) => Some(h))
   
-  def map[B](f: A => B): Stream[B] = foldRight(empty[B]((a, b) => cons(f(a), b)))
+//  def map[B](f: A => B): Stream[B] = foldRight(empty[B]((a, b) => cons(f(a), b)))
 
-    def filter(f: A => Boolean): Stream[A] = {
-    foldRight(Stream.empty[A])((h, t) => if (f(h)) Stream.cons(h, t) else t)
-  }
+  def filter(f: A => Boolean): Stream[A] = foldRight(Stream.empty[A])((h, t) => if (f(h)) Stream.cons(h, t) else t)
 
   def append[B >: A](s: => Stream[B]): Stream[B] = foldRight(s)((h, t) => Stream.cons(h, t))
 
   def flatMap[B](f: A => Stream[B]): Stream[B] = foldRight(Stream.empty[B])((h, t) => f(h).append(t))
 
   def zipWith[B, C](s2: Stream[B])(f: (A, B) => C): Stream[C] = {
-    Stream.unfold((this, s2))(a => {
-      a match {
-        case (Cons(h1, t1), Cons(h2, t2)) => Some((f(h1(), h2()), (t1(), t2())))
-        case _ => None
-      }
-    })
+    unfold((this, s2)) {
+      case (Cons(h1, t1), Cons(h2, t2)) => Some((f(h1(), h2()), (t1(), t2())))
+      case _ => None
+    }
   }
 
   def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] = {
-    Stream.unfold(this, s2)(a => {
-      a match {
-        case (Cons(h1, t1), Empty) => Some(((Some(h1()), None)), (t1(), Stream.empty))
-        case (Empty, Cons(h2, t2)) => Some(((None, Some(h2()))), (Stream.empty, t2()))
-        case (Cons(h1, t1), Cons(h2, t2)) => Some(((Some(h1()), Some(h2()))), (t1(), t2()))
-        case _ => None
-      }
-    })
+    unfold(this, s2) {
+      case (Cons(h1, t1), Empty) => Some((Some(h1()), None), (t1(), Stream.empty))
+      case (Empty, Cons(h2, t2)) => Some((None, Some(h2())), (Stream.empty, t2()))
+      case (Cons(h1, t1), Cons(h2, t2)) => Some((Some(h1()), Some(h2())), (t1(), t2()))
+      case _ => None
+    }
   }
 
-  def startsWith[A](s: Stream[A]): Boolean = {
-    Stream.unfold(this, s)(a => {
-      a match {
-        case (Empty, Cons(_, _)) => Some(false, (Stream.empty, Stream.empty))
-        case (Cons(h1, t1), Cons(h2, t2)) => Some(h1() == h2(), (t1(), t2()))
-        case _ => None
-      }
-    }).forAll(a => a)
+  def startsWith[B](s: Stream[B]): Boolean = {
+    unfold(this, s) {
+      case (Empty, Cons(_, _)) => Some(false, (Stream.empty, Stream.empty))
+      case (Cons(h1, t1), Cons(h2, t2)) => Some(h1() == h2(), (t1(), t2()))
+      case _ => None
+    }.forAll(a => a)
   }
 
   def tails: Stream[Stream[A]] = {
-    Stream.unfold(this)(a => {
-      a match {
-        case Empty => None
-        case (Cons(h, t)) => Some((Stream.cons(h(), t()), t()))
-      }
-    }).append(Stream(Stream.empty))
+    unfold(this) {
+      case Empty => None
+      case Cons(h, t) => Some((Stream.cons(h(), t()), t()))
+    }.append(Stream(Stream.empty))
   }
 
   def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] = {
@@ -125,10 +114,9 @@ object Stream {
     case (a, b) => Some(a, (b, a + b))
   }
 
-  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = {
-    f(z) match {
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = f(z) match {
       case None => empty
       case Some((a, s)) => cons(a, unfold(s)(f))
     }
-  }
+
 }
