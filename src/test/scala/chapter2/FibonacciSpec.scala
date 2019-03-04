@@ -1,10 +1,10 @@
 package chapter2
 
-import org.scalatest._
 import org.scalacheck.Gen
+import org.scalatest._
 import org.scalatest.prop.PropertyChecks
 
-import annotation.tailrec
+import scala.annotation.tailrec
 
 object Fibonacci {
 

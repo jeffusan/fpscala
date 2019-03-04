@@ -1,7 +1,7 @@
 package chapter3
 
-import org.scalatest._
 import org.scalacheck.Gen
+import org.scalatest._
 import org.scalatest.prop.PropertyChecks
 
 class ConsSpec extends PropSpec with Matchers with PropertyChecks {
@@ -134,4 +134,5 @@ class ConsSpec extends PropSpec with Matchers with PropertyChecks {
   property("reverse") {
     List.reverse(List(1,2,3)) shouldBe List(3,2,1)
   }
+
 }

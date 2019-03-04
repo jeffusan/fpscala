@@ -5,7 +5,7 @@ import org.scalatest.prop.PropertyChecks
 
 trait Sorter {
 
-  def intSorted(a: Int, b: Int): Boolean = ( a <= b )
+  def intSorted(a: Int, b: Int): Boolean = a <= b
 
   def isSorted[A](as: Array[A], ordered: (A, A) => Boolean): Boolean = {
       val b = as.toSeq.sliding(2) // get pairwise
